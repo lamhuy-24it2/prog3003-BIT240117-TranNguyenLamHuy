@@ -1,0 +1,92 @@
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+public class Main {
+
+    static class WorkerThread extends Thread {
+        @Override
+        public void run() {
+            System.out.println("Thread đang chạy…");
+        }
+    }
+
+    static class WorkerRunnable implements Runnable {
+        @Override
+        public void run() {
+            System.out.println("Runnable đang chạy…");
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        System.out.println("========== BÀI 1 ==========");
+        WorkerThread workerThread = new WorkerThread();
+        Thread runnableThread = new Thread(new WorkerRunnable());
+
+        workerThread.start();
+        runnableThread.start();
+
+        workerThread.join();
+        runnableThread.join();
+
+        System.out.println("\n========== BÀI 2 ==========");
+        Thread[] threads = new Thread[5];
+        for (int i = 0; i < 5; i++) {
+            threads[i] = new Thread(() -> {
+                String threadName = Thread.currentThread().getName();
+                for (int j = 1; j <= 10; j++) {
+                    System.out.println(threadName + " - " + j);
+                }
+            }, "Thread-" + (i + 1));
+            threads[i].start();
+        }
+
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        System.out.println("\n========== BÀI 3 ==========");
+        CompletableFuture<Void> futureBai3 = CompletableFuture
+                .supplyAsync(() -> Arrays.asList(1, 2, 5, 3, 100))
+                .thenApply(list -> list.stream()
+                        .filter(n -> n % 2 != 0)
+                        .sorted()
+                        .collect(Collectors.toList()))
+                .thenApply(result -> "Kết quả là: " + result)
+                .thenAccept(System.out::println);
+
+        futureBai3.join();
+
+        System.out.println("\n========== BÀI 4 ==========");
+        CompletableFuture<Void> task1 = CompletableFuture.runAsync(() -> {
+            System.out.println("1. Đang kiểm tra tính khả dụng của sản phẩm...");
+            sleep(1000);
+            System.out.println("-> Kiểm tra khả dụng hoàn tất.");
+        });
+
+        CompletableFuture<Void> task2 = CompletableFuture.runAsync(() -> {
+            System.out.println("2. Đang tiến hành thanh toán...");
+            sleep(2000);
+            System.out.println("-> Thanh toán hoàn tất.");
+        });
+
+        CompletableFuture<Void> task3 = CompletableFuture.runAsync(() -> {
+            System.out.println("3. Đang chuẩn bị vận chuyển...");
+            sleep(1500);
+            System.out.println("-> Chuẩn bị vận chuyển hoàn tất.");
+        });
+
+        CompletableFuture.allOf(task1, task2, task3).thenRun(() -> {
+            System.out.println("Hệ thống hoàn thành xử lý đơn hàng!");
+        }).join();
+    }
+
+    private static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}

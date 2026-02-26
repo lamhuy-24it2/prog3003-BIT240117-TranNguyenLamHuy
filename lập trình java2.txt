@@ -1,0 +1,61 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+public class Main {
+
+    @FunctionalInterface
+    interface MathOperation {
+        int compute(int a, int b);
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("========== BÀI 1 ==========");
+        MathOperation addition = (a, b) -> a + b;
+        MathOperation subtraction = (a, b) -> a - b;
+        MathOperation multiplication = (a, b) -> a * b;
+        MathOperation division = (a, b) -> a / b;
+
+        System.out.println("10 + 5 = " + addition.compute(10, 5));
+        System.out.println("10 - 5 = " + subtraction.compute(10, 5));
+        System.out.println("10 * 5 = " + multiplication.compute(10, 5));
+        System.out.println("10 / 5 = " + division.compute(10, 5));
+
+        System.out.println("\n========== BÀI 2 ==========");
+        List<String> cities = Arrays.asList("Hanoi", "Ho Chi Minh", "Da Nang", "Hue");
+        Collections.sort(cities, (s1, s2) -> s1.length() - s2.length());
+        System.out.println(cities);
+
+        System.out.println("\n========== BÀI 3 ==========");
+        Predicate<Integer> isEven = n -> n % 2 == 0;
+        int testNumber = 4;
+        System.out.println(testNumber + " là số chẵn? " + isEven.test(testNumber));
+
+        System.out.println("\n========== BÀI 4 ==========");
+        List<String> currencies = Arrays.asList("$10", "$20", "$50");
+        Function<String, Integer> currencyToInt = s -> Integer.parseInt(s.replace("$", ""));
+        List<Integer> integers = currencies.stream()
+                .map(currencyToInt)
+                .collect(Collectors.toList());
+        System.out.println(integers);
+
+        System.out.println("\n========== BÀI 5 ==========");
+        Supplier<Double> randomSupplier = () -> Math.random() * 100;
+        Consumer<Double> printConsumer = num -> System.out.println("Số may mắn: " + num);
+        printConsumer.accept(randomSupplier.get());
+
+        System.out.println("\n========== BÀI 6 ==========");
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
+        int sum = numbers.stream()
+                .filter(n -> n % 2 == 0)
+                .mapToInt(n -> n * n)
+                .sum();
+        System.out.println("Tổng bình phương các số chẵn: " + sum);
+    }
+}

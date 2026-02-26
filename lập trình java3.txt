@@ -1,0 +1,173 @@
+public class Main {
+
+    static class DatabaseConnection {
+        private static DatabaseConnection instance;
+
+        private DatabaseConnection() {
+        }
+
+        public static DatabaseConnection getInstance() {
+            if (instance == null) {
+                instance = new DatabaseConnection();
+            }
+            return instance;
+        }
+
+        public void connect() {
+            System.out.println("Đã kết nối cơ sở dữ liệu.");
+        }
+    }
+
+    interface Notification {
+        void notifyUser();
+    }
+
+    static class SMSNotification implements Notification {
+        @Override
+        public void notifyUser() {
+            System.out.println("Gửi thông báo qua SMS.");
+        }
+    }
+
+    static class EmailNotification implements Notification {
+        @Override
+        public void notifyUser() {
+            System.out.println("Gửi thông báo qua Email.");
+        }
+    }
+
+    static class NotificationFactory {
+        public Notification createNotification(String channel) {
+            if (channel == null) return null;
+            if (channel.equalsIgnoreCase("SMS")) return new SMSNotification();
+            if (channel.equalsIgnoreCase("EMAIL")) return new EmailNotification();
+            throw new IllegalArgumentException("Kênh không hợp lệ");
+        }
+    }
+
+    static class TV {
+        public void turnOn() { System.out.println("Bật TV."); }
+    }
+
+    static class SoundSystem {
+        public void turnOn() { System.out.println("Bật dàn âm thanh."); }
+    }
+
+    static class DVDPlayer {
+        public void turnOn() { System.out.println("Bật đầu DVD."); }
+    }
+
+    static class HomeTheaterFacade {
+        private TV tv = new TV();
+        private SoundSystem soundSystem = new SoundSystem();
+        private DVDPlayer dvdPlayer = new DVDPlayer();
+
+        public void watchMovie() {
+            System.out.println("Chuẩn bị xem phim...");
+            tv.turnOn();
+            soundSystem.turnOn();
+            dvdPlayer.turnOn();
+            System.out.println("Hệ thống đã sẵn sàng!");
+        }
+    }
+
+    interface PaymentStrategy {
+        void pay(int amount);
+    }
+
+    static class CreditCardPayment implements PaymentStrategy {
+        @Override
+        public void pay(int amount) {
+            System.out.println("Thanh toán " + amount + " bằng Credit Card.");
+        }
+    }
+
+    static class PayPalPayment implements PaymentStrategy {
+        @Override
+        public void pay(int amount) {
+            System.out.println("Thanh toán " + amount + " bằng PayPal.");
+        }
+    }
+
+    static class ShoppingCart {
+        private PaymentStrategy paymentStrategy;
+
+        public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
+            this.paymentStrategy = paymentStrategy;
+        }
+
+        public void checkout(int amount) {
+            if (paymentStrategy != null) {
+                paymentStrategy.pay(amount);
+            } else {
+                System.out.println("Chưa chọn phương thức thanh toán.");
+            }
+        }
+    }
+
+    interface MessageService {
+        void sendMessage(String message);
+    }
+
+    static class EmailService implements MessageService {
+        @Override
+        public void sendMessage(String message) {
+            System.out.println("Gửi Email: " + message);
+        }
+    }
+
+    static class SMSService implements MessageService {
+        @Override
+        public void sendMessage(String message) {
+            System.out.println("Gửi SMS: " + message);
+        }
+    }
+
+    static class AppNotification {
+        private MessageService messageService;
+
+        public void setMessageService(MessageService messageService) {
+            this.messageService = messageService;
+        }
+
+        public void send(String message) {
+            if (messageService != null) {
+                messageService.sendMessage(message);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println("========== BÀI 1: SINGLETON ==========");
+        DatabaseConnection db1 = DatabaseConnection.getInstance();
+        DatabaseConnection db2 = DatabaseConnection.getInstance();
+        db1.connect();
+        System.out.println("db1 và db2 là cùng một instance: " + (db1 == db2));
+
+        System.out.println("\n========== BÀI 2: FACTORY METHOD ==========");
+        NotificationFactory factory = new NotificationFactory();
+        Notification sms = factory.createNotification("SMS");
+        Notification email = factory.createNotification("EMAIL");
+        sms.notifyUser();
+        email.notifyUser();
+
+        System.out.println("\n========== BÀI 3: FACADE ==========");
+        HomeTheaterFacade homeTheater = new HomeTheaterFacade();
+        homeTheater.watchMovie();
+
+        System.out.println("\n========== BÀI 4: STRATEGY ==========");
+        ShoppingCart cart = new ShoppingCart();
+        cart.setPaymentStrategy(new CreditCardPayment());
+        cart.checkout(500000);
+        cart.setPaymentStrategy(new PayPalPayment());
+        cart.checkout(250000);
+
+        System.out.println("\n========== BÀI 5: DEPENDENCY INJECTION ==========");
+        AppNotification appNotification = new AppNotification();
+        appNotification.setMessageService(new EmailService());
+        appNotification.send("Đơn hàng của bạn đã được xác nhận.");
+        appNotification.setMessageService(new SMSService());
+        appNotification.send("Mã OTP của bạn là 123456.");
+    }
+}
